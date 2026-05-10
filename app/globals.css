@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@400;500;600;700&display=swap");
+
 :root {
   color-scheme: light;
 }
@@ -10,11 +12,7 @@ body {
   margin: 0;
   background: #fff;
   color: #101010;
-  font-family:
-    "Noto Sans JP",
-    "Hiragino Kaku Gothic ProN",
-    "Yu Gothic",
-    sans-serif;
+  font-family: "M PLUS 1p", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
 }
 
 .container {
@@ -40,6 +38,7 @@ textarea {
   width: 100%;
   min-height: 220px;
   resize: vertical;
+  font-family: "M PLUS 1p", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
   border: 1px solid #d9d9d9;
   border-radius: 10px;
   padding: 14px;
@@ -61,6 +60,7 @@ button {
   border: 1px solid #cfcfcf;
   background: #fafafa;
   color: inherit;
+  font-family: "M PLUS 1p", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
   border-radius: 8px;
   padding: 7px 12px;
   cursor: pointer;
