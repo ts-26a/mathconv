@@ -38,7 +38,15 @@ test("symbol words are converted and surrounding spaces are removed", () => {
 
 test("symbol words keep original text when not in map", () => {
   assert.equal(convertMathText("hello world"), "hello world");
+  assert.equal(convertMathText("hello\nworld"), "hello\nworld");
   assert.equal(convertMathText("alpha+beta"), "alpha+beta");
+});
+
+test("symbol words support whitespace boundaries and keep newlines", () => {
+  assert.equal(convertMathText("alpha\nbeta"), "α\nβ");
+  assert.equal(convertMathText("alpha\n+ beta"), "α\n+β");
+  assert.equal(convertMathText("forall x in RR\nexists y in CC"), "∀x∈ℝ\n∃y∈ℂ");
+  assert.equal(convertMathText("alpha\tbeta"), "αβ");
 });
 
 test("symbol words and script conversion coexist", () => {

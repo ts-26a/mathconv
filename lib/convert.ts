@@ -289,6 +289,32 @@ function isAsciiLetter(ch: string): boolean {
   return (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
 }
 
+function isBoundaryWhitespace(ch: string | undefined): boolean {
+  if (ch === undefined) {
+    return true;
+  }
+  return (
+    ch === " " ||
+    ch === "\n" ||
+    ch === "\t" ||
+    ch === "\r" ||
+    ch === "\f" ||
+    ch === "\v"
+  );
+}
+
+function isSoftWhitespace(ch: string | undefined): boolean {
+  return ch === " " || ch === "\t";
+}
+
+function trimSoftWhitespaceEnd(value: string): string {
+  let end = value.length;
+  while (end > 0 && isSoftWhitespace(value[end - 1])) {
+    end -= 1;
+  }
+  return end === value.length ? value : value.slice(0, end);
+}
+
 function getMap(mode: Mode): Record<string, string> {
   return mode === "sub" ? SUBSCRIPT_MAP : SUPERSCRIPT_MAP;
 }
@@ -342,54 +368,45 @@ function convertSingle(ch: string, mode: Mode): string | null {
 }
 
 export function convertSymbolWords(input: string): string {
-  const padded = ` ${input} `;
   let out = "";
   let i = 0;
-  let suppressLeadingSpace = false;
 
-  while (i < padded.length) {
-    const ch = padded[i];
-    if (ch === " ") {
-      const wordStart = i + 1;
-      let wordEnd = wordStart;
-      while (wordEnd < padded.length && isAsciiLetter(padded[wordEnd])) {
-        wordEnd += 1;
-      }
+  while (i < input.length) {
+    const ch = input[i];
+    if (!isAsciiLetter(ch)) {
+      out += ch;
+      i += 1;
+      continue;
+    }
 
-      if (wordEnd > wordStart && wordEnd < padded.length && padded[wordEnd] === " ") {
-        const word = padded.slice(wordStart, wordEnd);
-        const symbol = SYMBOL_MAP[word];
-        if (symbol !== undefined) {
-          out += symbol;
-          i = wordEnd;
-          suppressLeadingSpace = true;
-          continue;
+    const start = i;
+    let end = i + 1;
+    while (end < input.length && isAsciiLetter(input[end])) {
+      end += 1;
+    }
+
+    const word = input.slice(start, end);
+    const left = start === 0 ? undefined : input[start - 1];
+    const right = end === input.length ? undefined : input[end];
+    const hasBoundary = isBoundaryWhitespace(left) && isBoundaryWhitespace(right);
+
+    if (hasBoundary) {
+      const symbol = SYMBOL_MAP[word];
+      if (symbol !== undefined) {
+        out = trimSoftWhitespaceEnd(out);
+        out += symbol;
+        i = end;
+        while (i < input.length && isSoftWhitespace(input[i])) {
+          i += 1;
         }
-
-        out += suppressLeadingSpace ? word : padded.slice(i, wordEnd);
-        i = wordEnd;
-        suppressLeadingSpace = false;
-        continue;
-      }
-
-      if (suppressLeadingSpace) {
-        suppressLeadingSpace = false;
-        i += 1;
         continue;
       }
     }
 
-    out += ch;
-    suppressLeadingSpace = false;
-    i += 1;
+    out += word;
+    i = end;
   }
 
-  if (out.startsWith(" ")) {
-    out = out.slice(1);
-  }
-  if (out.endsWith(" ")) {
-    out = out.slice(0, -1);
-  }
   return out;
 }
 
