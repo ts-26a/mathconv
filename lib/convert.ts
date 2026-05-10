@@ -1,5 +1,195 @@
 type Mode = "sub" | "sup";
 
+const SYMBOL_MAP: Record<string, string> = {
+  // Greek lowercase
+  alpha: "α",
+  beta: "β",
+  gamma: "γ",
+  delta: "δ",
+  epsilon: "ϵ",
+  varepsilon: "ε",
+  zeta: "ζ",
+  eta: "η",
+  theta: "θ",
+  vartheta: "ϑ",
+  iota: "ι",
+  kappa: "κ",
+  lambda: "λ",
+  mu: "μ",
+  nu: "ν",
+  xi: "ξ",
+  pi: "π",
+  varpi: "ϖ",
+  rho: "ρ",
+  varrho: "ϱ",
+  sigma: "σ",
+  varsigma: "ς",
+  tau: "τ",
+  upsilon: "υ",
+  phi: "ϕ",
+  varphi: "φ",
+  chi: "χ",
+  psi: "ψ",
+  omega: "ω",
+
+  // Greek uppercase
+  Gamma: "Γ",
+  Delta: "Δ",
+  Theta: "Θ",
+  Lambda: "Λ",
+  Xi: "Ξ",
+  Pi: "Π",
+  Sigma: "Σ",
+  Upsilon: "Υ",
+  Phi: "Φ",
+  Psi: "Ψ",
+  Omega: "Ω",
+
+  // Binary operators
+  pm: "±",
+  mp: "∓",
+  times: "×",
+  div: "÷",
+  cdot: "⋅",
+  ast: "∗",
+  star: "⋆",
+  circ: "∘",
+  bullet: "∙",
+  oplus: "⊕",
+  ominus: "⊖",
+  otimes: "⊗",
+  oslash: "⊘",
+  odot: "⊙",
+  cap: "∩",
+  cup: "∪",
+  sqcap: "⊓",
+  sqcup: "⊔",
+  vee: "∨",
+  wedge: "∧",
+  setminus: "∖",
+  wr: "≀",
+
+  // Relations
+  le: "≤",
+  leq: "≤",
+  ge: "≥",
+  geq: "≥",
+  neq: "≠",
+  ne: "≠",
+  equiv: "≡",
+  sim: "∼",
+  simeq: "≃",
+  cong: "≅",
+  approx: "≈",
+  propto: "∝",
+  in: "∈",
+  notin: "∉",
+  ni: "∋",
+  subset: "⊂",
+  supset: "⊃",
+  subseteq: "⊆",
+  supseteq: "⊇",
+  nsubseteq: "⊈",
+  nsupseteq: "⊉",
+  parallel: "∥",
+  perp: "⊥",
+  mid: "∣",
+  models: "⊨",
+
+  // Arrows
+  leftarrow: "←",
+  gets: "←",
+  rightarrow: "→",
+  to: "→",
+  leftrightarrow: "↔",
+  Leftarrow: "⇐",
+  Rightarrow: "⇒",
+  Leftrightarrow: "⇔",
+  mapsto: "↦",
+  uparrow: "↑",
+  downarrow: "↓",
+  updownarrow: "↕",
+  nearrow: "↗",
+  searrow: "↘",
+  swarrow: "↙",
+  nwarrow: "↖",
+  longleftarrow: "⟵",
+  longrightarrow: "⟶",
+  longleftrightarrow: "⟷",
+  Longleftarrow: "⟸",
+  Longrightarrow: "⟹",
+  Longleftrightarrow: "⟺",
+  longmapsto: "⟼",
+
+  // Logic and sets
+  forall: "∀",
+  exists: "∃",
+  nexists: "∄",
+  neg: "¬",
+  land: "∧",
+  lor: "∨",
+  emptyset: "∅",
+  varnothing: "∅",
+  infty: "∞",
+
+  // Common number sets
+  RR: "ℝ",
+  CC: "ℂ",
+  NN: "ℕ",
+  ZZ: "ℤ",
+  partial: "∂",
+  nabla: "∇",
+  aleph: "ℵ",
+  ell: "ℓ",
+  hbar: "ℏ",
+  Re: "ℜ",
+  Im: "ℑ",
+  wp: "℘",
+
+  // Big operators
+  sum: "∑",
+  prod: "∏",
+  coprod: "∐",
+  int: "∫",
+  iint: "∬",
+  iiint: "∭",
+  oint: "∮",
+  bigcap: "⋂",
+  bigcup: "⋃",
+  bigvee: "⋁",
+  bigwedge: "⋀",
+  bigoplus: "⨁",
+  bigotimes: "⨂",
+  bigodot: "⨀",
+
+  // Delimiters and punctuation-like symbols
+  langle: "⟨",
+  rangle: "⟩",
+  lfloor: "⌊",
+  rfloor: "⌋",
+  lceil: "⌈",
+  rceil: "⌉",
+  colon: ":",
+  ldots: "…",
+  cdots: "⋯",
+  vdots: "⋮",
+  ddots: "⋱",
+
+  // Common special symbols
+  degree: "°",
+  angle: "∠",
+  measuredangle: "∡",
+  triangle: "△",
+  Box: "□",
+  square: "□",
+  Diamond: "◇",
+  diamond: "⋄",
+  top: "⊤",
+  bot: "⊥",
+  vdash: "⊢",
+  dashv: "⊣",
+};
+
 const SUBSCRIPT_MAP: Record<string, string> = {
   "0": "₀",
   "1": "₁",
@@ -94,6 +284,11 @@ const SUPERSCRIPT_MAP: Record<string, string> = {
 const ALLOWED_GROUP_CHAR = /^[A-Za-z0-9+-]$/;
 const ALNUM_CHAR = /^[A-Za-z0-9]$/;
 
+function isAsciiLetter(ch: string): boolean {
+  const code = ch.charCodeAt(0);
+  return (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+}
+
 function getMap(mode: Mode): Record<string, string> {
   return mode === "sub" ? SUBSCRIPT_MAP : SUPERSCRIPT_MAP;
 }
@@ -146,7 +341,59 @@ function convertSingle(ch: string, mode: Mode): string | null {
   return converted === undefined ? null : converted;
 }
 
-export function convertMathText(input: string): string {
+export function convertSymbolWords(input: string): string {
+  const padded = ` ${input} `;
+  let out = "";
+  let i = 0;
+  let suppressLeadingSpace = false;
+
+  while (i < padded.length) {
+    const ch = padded[i];
+    if (ch === " ") {
+      const wordStart = i + 1;
+      let wordEnd = wordStart;
+      while (wordEnd < padded.length && isAsciiLetter(padded[wordEnd])) {
+        wordEnd += 1;
+      }
+
+      if (wordEnd > wordStart && wordEnd < padded.length && padded[wordEnd] === " ") {
+        const word = padded.slice(wordStart, wordEnd);
+        const symbol = SYMBOL_MAP[word];
+        if (symbol !== undefined) {
+          out += symbol;
+          i = wordEnd;
+          suppressLeadingSpace = true;
+          continue;
+        }
+
+        out += suppressLeadingSpace ? word : padded.slice(i, wordEnd);
+        i = wordEnd;
+        suppressLeadingSpace = false;
+        continue;
+      }
+
+      if (suppressLeadingSpace) {
+        suppressLeadingSpace = false;
+        i += 1;
+        continue;
+      }
+    }
+
+    out += ch;
+    suppressLeadingSpace = false;
+    i += 1;
+  }
+
+  if (out.startsWith(" ")) {
+    out = out.slice(1);
+  }
+  if (out.endsWith(" ")) {
+    out = out.slice(0, -1);
+  }
+  return out;
+}
+
+function convertScripts(input: string): string {
   let out = "";
   let i = 0;
 
@@ -198,4 +445,9 @@ export function convertMathText(input: string): string {
   }
 
   return out;
+}
+
+export function convertMathText(input: string): string {
+  const scriptConverted = convertScripts(input);
+  return convertSymbolWords(scriptConverted);
 }

@@ -28,3 +28,20 @@ test("sample sentence", () => {
   const output = "Dₙは正二面体群である。Dₙ={r,s | rⁿ=e, s²=e, srs=r⁻¹}";
   assert.equal(convertMathText(input), output);
 });
+
+test("symbol words are converted and surrounding spaces are removed", () => {
+  assert.equal(convertMathText("alpha + beta = gamma"), "α+β=γ");
+  assert.equal(convertMathText("forall x in RR exists y in CC"), "∀x∈ℝ∃y∈ℂ");
+  assert.equal(convertMathText("alpha beta"), "αβ");
+  assert.equal(convertMathText("x in A"), "x∈A");
+});
+
+test("symbol words keep original text when not in map", () => {
+  assert.equal(convertMathText("hello world"), "hello world");
+  assert.equal(convertMathText("alpha+beta"), "alpha+beta");
+});
+
+test("symbol words and script conversion coexist", () => {
+  assert.equal(convertMathText("x^(n+1) in RR"), "xⁿ⁺¹∈ℝ");
+  assert.equal(convertMathText("D_n in RR"), "Dₙ∈ℝ");
+});
