@@ -307,12 +307,19 @@ function isSoftWhitespace(ch: string | undefined): boolean {
   return ch === " " || ch === "\t";
 }
 
-function trimSoftWhitespaceEnd(value: string): string {
-  let end = value.length;
-  while (end > 0 && isSoftWhitespace(value[end - 1])) {
-    end -= 1;
+function dropOneTrailingSoftWhitespaceBeforeQuote(value: string): string {
+  if (value.length === 0) {
+    return value;
   }
-  return end === value.length ? value : value.slice(0, end);
+  const last = value[value.length - 1];
+  if (!isSoftWhitespace(last)) {
+    return value;
+  }
+  const prev = value.length > 1 ? value[value.length - 2] : undefined;
+  if (prev === "=") {
+    return value;
+  }
+  return value.slice(0, -1);
 }
 
 function getMap(mode: Mode): Record<string, string> {
@@ -393,11 +400,14 @@ export function convertSymbolWords(input: string): string {
     if (hasBoundary) {
       const symbol = SYMBOL_MAP[word];
       if (symbol !== undefined) {
-        out = trimSoftWhitespaceEnd(out);
+        if (isSoftWhitespace(left) && out.length > 0 && out[out.length - 1] === left) {
+          out = out.slice(0, -1);
+        }
         out += symbol;
-        i = end;
-        while (i < input.length && isSoftWhitespace(input[i])) {
-          i += 1;
+        if (isSoftWhitespace(right)) {
+          i = end + 1;
+        } else {
+          i = end;
         }
         continue;
       }
@@ -464,7 +474,76 @@ function convertScripts(input: string): string {
   return out;
 }
 
+function convertUnquotedSegment(input: string): string {
+  return convertSymbolWords(convertScripts(input));
+}
+
 export function convertMathText(input: string): string {
-  const scriptConverted = convertScripts(input);
-  return convertSymbolWords(scriptConverted);
+  let out = "";
+  let segment = "";
+  let quoted = false;
+  let justClosedQuote = false;
+
+  let i = 0;
+  while (i < input.length) {
+    const ch = input[i];
+
+    if (!quoted) {
+      if (ch !== "\"") {
+        segment += ch;
+        i += 1;
+        continue;
+      }
+
+      let nextSegment = segment;
+      if (justClosedQuote) {
+        const first = nextSegment[0];
+        const second = nextSegment.length > 1 ? nextSegment[1] : undefined;
+        if (isSoftWhitespace(first) && second !== undefined && !isAsciiLetter(second)) {
+          nextSegment = nextSegment.slice(1);
+        }
+        justClosedQuote = false;
+      }
+      out += convertUnquotedSegment(nextSegment);
+      out = dropOneTrailingSoftWhitespaceBeforeQuote(out);
+      segment = "";
+      quoted = true;
+      i += 1;
+      continue;
+    }
+
+    if (ch !== "\"") {
+      segment += ch;
+      i += 1;
+      continue;
+    }
+
+    const next = i + 1 < input.length ? input[i + 1] : undefined;
+    if (next === "\"") {
+      segment += "\"";
+      i += 2;
+      continue;
+    }
+
+    out += segment;
+    segment = "";
+    quoted = false;
+    justClosedQuote = true;
+    i += 1;
+  }
+
+  if (quoted) {
+    out += segment;
+  } else {
+    let tail = segment;
+    if (justClosedQuote) {
+      const first = tail[0];
+      const second = tail.length > 1 ? tail[1] : undefined;
+      if (isSoftWhitespace(first) && second !== undefined && !isAsciiLetter(second)) {
+        tail = tail.slice(1);
+      }
+    }
+    out += convertUnquotedSegment(tail);
+  }
+  return out;
 }

@@ -29,9 +29,96 @@ body {
   gap: 10px;
 }
 
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 label {
   font-size: 0.95rem;
   font-weight: 600;
+}
+
+.helpToggle {
+  font-size: 0.86rem;
+  padding: 5px 10px;
+}
+
+.panelHeaderSpacer {
+  display: inline-block;
+  font-size: 0.86rem;
+  padding: 5px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  visibility: hidden;
+  user-select: none;
+}
+
+.helpModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.45);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.helpModal {
+  width: min(600px, 100%);
+  max-height: min(80dvh, 700px);
+  overflow: auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+  border: 1px solid #e6e6e6;
+  font-family: "M PLUS 1p", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+}
+
+.helpModalHeader {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #fff;
+  border-bottom: 1px solid #ededed;
+}
+
+.helpModalHeader h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.helpModalClose {
+  padding: 6px 10px;
+  font-size: 0.86rem;
+}
+
+.helpModalBody {
+  padding: 16px;
+  line-height: 1.7;
+  font-size: 0.93rem;
+}
+
+.helpModalBody p {
+  margin: 0;
+}
+
+.helpModalBody p + p {
+  margin-top: 14px;
+}
+
+.helpModalBody code {
+  background: #f7f7f7;
+  border: 1px solid #ececec;
+  border-radius: 5px;
+  padding: 0 4px;
+  font-family: "M PLUS 1p", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
 }
 
 textarea {
